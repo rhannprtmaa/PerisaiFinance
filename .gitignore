@@ -1,0 +1,96 @@
+# Laravel specific
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+
+# Environment files
+.env
+.env.backup
+.env.production
+.env.testing
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# Ignored by Composer
+composer.lock
+
+# Ignored by NPM/Yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE specific
+/.idea
+/.vscode
+/.fleet
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Ignored by PHPUnit
+.phpunit.result.cache
+
+# Ignored by Laravel Telescope
+storage/telescope
+
+# Ignored by Laravel Horizon
+storage/horizon
+
+# Ignored by Laravel Mix
+/public/mix-manifest.json
+
+# Ignored by Laravel Valet
+.valet
+
+# Ignored by Laravel Backup
+storage/app/laravel-backups
+
+# Ignored by Laravel Debugbar
+storage/debugbar
+
+# Ignored by Laravel IDE Helper
+_ide_helper.php
+_ide_helper_models.php
+
+# Ignored by Laravel Nova
+nova-components
+
+# Ignored by Laravel Spark
+spark
+
+# Ignored by Laravel Vapor
+.vapor
+
+# Ignored by Laravel Forge
+forge
+
+# Ignored by Laravel Envoy
+.envoy
+
+# Ignored by Laravel Sail
+docker-compose.override.yml
+
+# Ignored by Laravel Dusk
+tests/Browser/screenshots
+tests/Browser/console
+tests/Browser/source
+
+# Ignored by Laravel Jetstream
+/public/js/manifest.js
+/public/js/vendor.js
+/public/css/app.css
+/public/js/app.js

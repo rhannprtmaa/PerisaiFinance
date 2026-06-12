@@ -1,0 +1,45 @@
+# Set default behavior to automatically normalize line endings
+* text=auto eol=lf
+
+# Custom diff settings for specific file types
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.js diff=javascript
+*.json diff=json
+*.md diff=markdown
+*.php diff=php
+*.scss diff=scss
+*.xml diff=xml
+*.yml diff=yaml
+*.yaml diff=yaml
+
+# Ignore files and directories when exporting
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore
+.env export-ignore
+.env.example export-ignore
+/tests export-ignore
+/resources/lang export-ignore
+/public/storage export-ignore
+/storage/*.key export-ignore
+/vendor export-ignore
+
+# Ensure these files are treated as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.bz2 binary
+*.7z binary
+
+# Ensure these files are treated as text
+*.txt text
+*.log text
+*.csv text
