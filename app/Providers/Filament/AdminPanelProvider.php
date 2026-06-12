@@ -23,8 +23,7 @@ use App\Http\Middleware\SecurityHeaders;
 
 /**
  * Class AdminPanelProvider
- * 
- * This class provides the configuration for the admin panel in the Filament admin panel.
+ * * This class provides the configuration for the admin panel in the Filament admin panel.
  */
 class AdminPanelProvider extends PanelProvider
 {
@@ -41,6 +40,12 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+
+            // Konfigurasi Nama dan Logo Brand Utama
+            ->brandName('Perisai Finance')
+            ->brandLogo(asset('images/perisai.png'))
+            ->brandLogoHeight('3.5rem')
+
             ->colors([
                 'primary' => Color::Amber,
             ])
