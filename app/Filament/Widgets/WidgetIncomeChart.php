@@ -11,8 +11,7 @@ use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 /**
  * Class WidgetIncomeChart
- * 
- * Widget class for displaying income trends in a chart.
+ * * Widget class for displaying income trends in a chart.
  */
 class WidgetIncomeChart extends ChartWidget
 {
@@ -33,19 +32,27 @@ class WidgetIncomeChart extends ChartWidget
     protected static string $color = 'success';
 
     /**
+     * Mengatur ukuran widget mengambil 1 kolom (setengah lebar layar)
+     * agar bisa bersandingan kiri-kanan secara simetris dengan WidgetExpenseChart.
+     */
+    protected int | string | array $columnSpan = 1;
+
+    /**
      * Get the data for the chart.
      *
      * @return array
      */
     protected function getData(): array
     {
-        $startDate = $this->parseDate($this->filters['startDate'] ?? null, now()->startOfYear());
+        // FIX: Disamakan menggunakan startOfMonth() agar rentang waktu bawaan seimbang dengan grafik pengeluaran
+        $startDate = $this->parseDate($this->filters['startDate'] ?? null, Carbon::now()->startOfMonth());
         $endDate = $this->parseDate($this->filters['endDate'] ?? null, now());
 
         $data = $this->getIncomeData($startDate, $endDate);
 
-        $backgroundColor = 'rgba(75, 192, 192, 0.2)'; // Green
-        $borderColor = 'rgba(75, 192, 192, 1)'; // Green
+        // Menggunakan warna hijau Emerald yang lebih modern dan transparan
+        $backgroundColor = 'rgba(16, 185, 129, 0.15)';
+        $borderColor = 'rgba(16, 185, 129, 1)';
 
         return [
             'datasets' => [
@@ -55,9 +62,11 @@ class WidgetIncomeChart extends ChartWidget
                     'backgroundColor' => $backgroundColor,
                     'borderColor' => $borderColor,
                     'borderWidth' => 2,
+                    'borderRadius' => 4, // Membuat ujung kotak diagram batang agak melengkung estetik
                 ],
             ],
-            'labels' => $data->map(fn (TrendValue $value) => Carbon::parse($value->date)->format('Y-m-d')),
+            // Mengubah format ke 'd M' (contoh: 12 Jun) agar serasi dengan grafik pengeluaran
+            'labels' => $data->map(fn (TrendValue $value) => Carbon::parse($value->date)->format('d M')),
         ];
     }
 

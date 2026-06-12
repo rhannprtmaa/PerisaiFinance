@@ -11,8 +11,7 @@ use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 /**
  * Class WidgetExpenseChart
- * 
- * Widget class for displaying expense trends in a chart.
+ * * Widget class for displaying expense trends in a chart.
  */
 class WidgetExpenseChart extends ChartWidget
 {
@@ -33,6 +32,12 @@ class WidgetExpenseChart extends ChartWidget
     protected static string $color = 'danger';
 
     /**
+     * Mengatur ukuran widget mengambil 1 kolom (setengah lebar layar)
+     * agar bisa bersandingan kiri-kanan secara simetris dengan WidgetIncomeChart.
+     */
+    protected int | string | array $columnSpan = 1;
+
+    /**
      * Get the data for the chart.
      *
      * @return array
@@ -47,8 +52,9 @@ class WidgetExpenseChart extends ChartWidget
         $trendDirection = $data->map(fn (TrendValue $value) => $value->aggregate)->toArray();
         $isIncreasing = $this->isTrendIncreasing($trendDirection);
 
-        $backgroundColor = $isIncreasing ? 'rgba(75, 192, 192, 0.2)' : 'rgba(255, 99, 132, 0.2)';
-        $borderColor = $isIncreasing ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)';
+        // Menggunakan kombinasi warna Tailwind CSS (Emerald & Red) yang lebih soft
+        $backgroundColor = $isIncreasing ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)';
+        $borderColor = $isIncreasing ? 'rgba(239, 68, 68, 1)' : 'rgba(34, 197, 94, 1)';
 
         return [
             'datasets' => [
@@ -58,9 +64,12 @@ class WidgetExpenseChart extends ChartWidget
                     'backgroundColor' => $backgroundColor,
                     'borderColor' => $borderColor,
                     'borderWidth' => 2,
+                    'tension' => 0.35, // Membuat garis melengkung bergelombang secara halus (smooth curve)
+                    'fill' => true,    // Memberikan efek bayangan warna gradasi di bawah garis grafik
                 ],
             ],
-            'labels' => $data->map(fn (TrendValue $value) => Carbon::parse($value->date)->format('Y-m-d')),
+            // Mengubah format ke 'd M' agar serasi dengan grafik penghasilan
+            'labels' => $data->map(fn (TrendValue $value) => Carbon::parse($value->date)->format('d M')),
         ];
     }
 

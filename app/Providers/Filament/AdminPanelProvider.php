@@ -21,10 +21,6 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use App\Http\Middleware\SecurityHeaders;
 
-/**
- * Class AdminPanelProvider
- * * This class provides the configuration for the admin panel in the Filament admin panel.
- */
 class AdminPanelProvider extends PanelProvider
 {
     /**
@@ -43,8 +39,8 @@ class AdminPanelProvider extends PanelProvider
 
             // Konfigurasi Nama dan Logo Brand Utama
             ->brandName('Perisai Finance')
-            ->brandLogo(asset('images/perisai.png'))
-            ->brandLogoHeight('3.5rem')
+            ->brandLogo(fn () => view('filament.admin.logo'))
+            ->brandLogoHeight('2.5rem')
 
             ->colors([
                 'primary' => Color::Amber,
@@ -54,8 +50,8 @@ class AdminPanelProvider extends PanelProvider
             ->pages([])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -71,6 +67,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            // Menggunakan string teks langsung agar terhindar dari error 'Class not found'
+            ->renderHook(
+                'panels::head.end',
+                fn () => view('filament.admin.login-background'),
+            );
     }
 }
