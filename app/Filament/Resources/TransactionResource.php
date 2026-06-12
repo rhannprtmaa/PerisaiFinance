@@ -11,32 +11,29 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-/**
- * Class TransactionResource
- * 
- * Resource class for managing transactions in the Filament admin panel.
- */
 class TransactionResource extends Resource
 {
-    /**
-     * The model associated with the resource.
-     *
-     * @var string|null
-     */
     protected static ?string $model = Transaction::class;
 
-    /**
-     * The icon used for navigation.
-     *
-     * @var string|null
-     */
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     /**
-     * Define the form schema for the resource.
-     *
-     * @param Form $form
-     * @return Form
+     * LOGIKA UTAMA: Membatasi tampilan data berdasarkan Role yang sedang Login
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        // Jika user yang login BUKAN bendahara, batasi hanya melihat departemennya sendiri
+        if (auth()->check() && auth()->user()->role !== 'bendahara') {
+            $query->where('department', auth()->user()->department);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Blueprint Formulir Input Transaksi
      */
     public static function form(Form $form): Form
     {
@@ -44,20 +41,30 @@ class TransactionResource extends Resource
             Forms\Components\TextInput::make('name')
                 ->required()
                 ->maxLength(255)
-                ->label('Nama'),
+                ->label('Nama Transaksi / Penanggung Jawab'),
+
+            // Kolom Departemen Cerdas
+                    Forms\Components\Select::make('department')
+                ->label('Departemen / Divisi')
+                ->options([
+                    'bendahara' => '💰 Internal Bendahara',
+                    'penalaran' => '🧠 Divisi Penalaran', // Tambahkan baris baru ini!
+                    'hrd' => '👥 HRD (Human Resources)',
+                    'it' => '💻 IT & Technology',
+                    'marketing' => '📢 Marketing & Pemasaran',
+                ])
+                ->searchable()
+                ->preload()
+                ->default(fn () => auth()->user()->department) // Otomatis terisi sesuai divisi user yang login
+                ->disabled(fn () => auth()->user()->role !== 'bendahara') // Kunci input jika bukan bendahara
+                ->dehydrated() // Tetap simpan ke database meskipun statusnya disabled
+                ->required(),
 
             Forms\Components\Select::make('category_id')
                 ->relationship('category', 'name')
-                ->options(function () {
-                    return \App\Models\Category::query()
-                        ->orderByRaw("FIELD(is_expense, 0, 1)")
-                        ->get()
-                        ->mapWithKeys(function ($category) {
-                            $type = $category->is_expense ? '( Pengeluaran )' : '( Pemasukan )';
-                            return [$category->id => "$category->name - $type"];
-                        });
-                })
                 ->required()
+                ->searchable()
+                ->preload()
                 ->label('Kategori'),
 
             Forms\Components\DatePicker::make('date_transaction')
@@ -65,77 +72,80 @@ class TransactionResource extends Resource
                 ->label('Tanggal Transaksi'),
 
             Forms\Components\TextInput::make('amount')
-                ->required()
+                ->numeric()
                 ->prefix('Rp')
-                ->extraAttributes(['oninput' => 'formatCurrency(this)'])
-                ->label('Jumlah')
-                ->formatStateUsing(fn ($state) => number_format((float) str_replace(['Rp', '.', ','], ['', '', '.'], $state), 2, ',', '.'))
-                ->dehydrateStateUsing(fn ($state) => str_replace(['Rp', '.', ','], ['', '', '.'], $state)),
+                ->required()
+                ->label('Jumlah (Nominal)'),
 
             Forms\Components\TextInput::make('note')
                 ->required()
-                ->maxLength(255)
-                ->label('Catatan'),
+                ->label('Catatan ringkas'),
 
+            // FIX: Gambar diubah menjadi Opsional (Nullable)
             Forms\Components\FileUpload::make('image')
                 ->image()
-                ->required()
-                ->label('Gambar'),
+                ->label('Foto Nota / Bukti Transaksi (Opsional)')
+                ->nullable(),
         ]);
     }
 
     /**
-     * Define the table schema for the resource.
-     *
-     * @param Table $table
-     * @return Table
+     * Blueprint Tabel Riwayat Transaksi
      */
     public static function table(Table $table): Table
     {
         return $table->columns([
-            Tables\Columns\ImageColumn::make('category.image')
-                ->label('Kategori')
-                ->sortable(),
-
-            Tables\Columns\TextColumn::make('category.name')
-                ->description(fn (Transaction $record): string => $record->name)
-                ->label('Transaksi'),
-
-            Tables\Columns\IconColumn::make('category.is_expense')
-                ->label('Tipe')
-                ->trueIcon('heroicon-o-arrow-up-circle')
-                ->falseIcon('heroicon-o-arrow-down-circle')
-                ->trueColor('danger')
-                ->falseColor('success')
-                ->boolean(),
-
             Tables\Columns\TextColumn::make('date_transaction')
-                ->date()
-                ->label('Tanggal')
-                ->sortable(),
-
-            Tables\Columns\TextColumn::make('amount')
-                ->label('Jumlah')
+                ->date('d M Y')
                 ->sortable()
-                ->formatStateUsing(fn (string $state): string => 'Rp ' . number_format((float) str_replace(['Rp', '.', ','], ['', '', '.'], $state), 2, ',', '.')),
+                ->label('Tanggal'),
+
+            Tables\Columns\TextColumn::make('name')
+                ->searchable()
+                ->label('Nama / PJB'),
+
+            // Menampilkan badge departemen dengan warna elegan
+                    Tables\Columns\TextColumn::make('department')
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'bendahara' => 'success',
+                    'penalaran' => 'warning', // Tambahkan ini agar divisi penalaran berwarna Oranye/Amber
+                    'it' => 'info',
+                    'hrd' => 'warning',
+                    'marketing' => 'purple',
+                    default => 'gray',
+                })
+                ->formatStateUsing(fn (string $state) => strtoupper($state))
+                ->label('Divisi'),
+
+            // Menampilkan emoticon kategori + namanya jika relasi di model aman
+            Tables\Columns\TextColumn::make('category.name')
+                ->label('Kategori'),
+
+            // Format Rupiah rapi tanpa desimal sen
+            Tables\Columns\TextColumn::make('amount')
+                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
+                ->sortable()
+                ->label('Nominal'),
 
             Tables\Columns\TextColumn::make('note')
-                ->label('Catatan')
-                ->sortable()
-                ->limit(50),
-            
-            Tables\Columns\TextColumn::make('created_at')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+                ->limit(30)
+                ->label('Catatan'),
 
-            Tables\Columns\TextColumn::make('updated_at')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\ImageColumn::make('image')
+                ->label('Nota'),
         ])
         ->filters([
-            // Define filters here
+            // Filter Berdasarkan Departemen (Sangat berguna untuk akun Bendahara)
+            Tables\Filters\SelectFilter::make('department')
+                ->options([
+                    'bendahara' => 'Internal Bendahara',
+                    'hrd' => 'HRD',
+                    'it' => 'IT',
+                    'marketing' => 'Marketing',
+                    'operations' => 'Operasional',
+                ])
+                ->label('Filter Divisi'),
         ])
         ->actions([
             Tables\Actions\EditAction::make(),
@@ -147,23 +157,11 @@ class TransactionResource extends Resource
         ]);
     }
 
-    /**
-     * Define the relations for the resource.
-     *
-     * @return array
-     */
     public static function getRelations(): array
     {
-        return [
-            // Define relations here
-        ];
+        return [];
     }
 
-    /**
-     * Define the pages for the resource.
-     *
-     * @return array
-     */
     public static function getPages(): array
     {
         return [

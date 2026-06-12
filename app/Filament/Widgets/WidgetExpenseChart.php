@@ -104,7 +104,11 @@ class WidgetExpenseChart extends ChartWidget
      */
     private function getExpenseData(Carbon $startDate, Carbon $endDate)
     {
-        return Trend::query(Transaction::expenses()->newQuery())
+        // FIX: Menyaring rute grafik garis pengeluaran agar otomatis terkunci sesuai divisi yang login selain bendahara
+        $query = Transaction::expenses()->newQuery()
+            ->when(auth()->check() && auth()->user()->role !== 'bendahara', fn($q) => $q->where('department', auth()->user()->department));
+
+        return Trend::query($query)
             ->between(start: $startDate, end: $endDate)
             ->perDay()
             ->sum('amount')

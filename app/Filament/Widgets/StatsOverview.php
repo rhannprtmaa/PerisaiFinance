@@ -91,6 +91,8 @@ class StatsOverview extends BaseWidget
     private function calculateTotal($query, ?Carbon $startDate, ?Carbon $endDate): float
     {
         return $query->clone()
+                     // FIX: Membatasi kalkulasi nominal jika user bukan bendahara
+                     ->when(auth()->check() && auth()->user()->role !== 'bendahara', fn($q) => $q->where('department', auth()->user()->department))
                      ->when($startDate, fn($q) => $q->where('date_transaction', '>=', $startDate))
                      ->when($endDate, fn($q) => $q->where('date_transaction', '<=', $endDate))
                      ->sum('amount');
@@ -107,6 +109,8 @@ class StatsOverview extends BaseWidget
     private function getTrendData($query, ?Carbon $startDate, ?Carbon $endDate): array
     {
         $trend = $query->clone()
+            // FIX: Membatasi jalur titik grafik jika user bukan bendahara
+            ->when(auth()->check() && auth()->user()->role !== 'bendahara', fn($q) => $q->where('department', auth()->user()->department))
             ->when($startDate, fn($q) => $q->where('date_transaction', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('date_transaction', '<=', $endDate))
             ->groupBy('date_transaction')

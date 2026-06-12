@@ -101,7 +101,11 @@ class WidgetIncomeChart extends ChartWidget
      */
     private function getIncomeData(Carbon $startDate, Carbon $endDate)
     {
-        return Trend::query(Transaction::income()->newQuery())
+        // FIX: Menyaring query diagram batang pendapatan agar terkunci per divisi saat login selain bendahara
+        $query = Transaction::income()->newQuery()
+            ->when(auth()->check() && auth()->user()->role !== 'bendahara', fn($q) => $q->where('department', auth()->user()->department));
+
+        return Trend::query($query)
             ->between(start: $startDate, end: $endDate)
             ->perDay()
             ->sum('amount')

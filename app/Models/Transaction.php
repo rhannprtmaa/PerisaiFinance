@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * Class Transaction
- * 
+ *
  * Represents a financial transaction, which can be either an expense or an income.
  *
  * @property string $name
@@ -30,15 +30,9 @@ class Transaction extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'name',
-        'category_id',
-        'date_transaction',
-        'amount',
-        'note',
-        'image',
-    ];
-
+  protected $fillable = [
+    'name', 'category_id', 'date_transaction', 'amount', 'note', 'image', 'department',
+];
     /**
      * Get the category that owns the transaction.
      *
