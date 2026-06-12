@@ -1,8 +1,8 @@
-# FinanSphere
+# PerisaiFinance
 
 ## Overview
 
-FinanSphere is a professional financial management application built with Laravel 10 and Filament, designed to provide comprehensive financial tracking and insights.
+PerisaFinance is a professional financial management application built with Laravel 10 and Filament, designed to provide comprehensive financial tracking and insights.
 
 ## 🌟 Key Features
 
@@ -41,7 +41,7 @@ Before installation, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Creative-Trees/VStudio-Kelola-Keuangan.git
+git clone https://github.com/rhannprtmaa/PerisaiFinance.git
 ```
 
 ### 2. Install Dependencies
@@ -132,14 +132,7 @@ finansphere/
   npm install
   ```
   
-## 📜 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## 🙌 Credits
 
-Created by Creative Trees Development Team
-- Lead Developer: **M'HALFIRZZHATULLAH**
-- Additional Developer: **MICHAEL ANDREA AQUINO**
-
-**© 2023 FinanSphere. All Rights Reserved.**
+- Developer: **Laode Raihan Pratama**
